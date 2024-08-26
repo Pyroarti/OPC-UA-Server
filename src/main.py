@@ -3,7 +3,7 @@ import time
 import threading
 
 server = Server()
-server.set_endpoint("opc.tcp://192.168.11.30:4840/freeopcua/server/")
+server.set_endpoint("opc.tcp://192.168.8.14:4840/freeopcua/server/")
 server.set_server_name("OPC UA Simulation Server")
 
 uri = "http://examples.freeopcua.github.io"
