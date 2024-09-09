@@ -5,6 +5,8 @@ from CTkTable import *
 from PIL import Image
 from tkinter import ttk
 
+from settings import SettingsWindow
+
 
 from create_logger import setup_logger
 
@@ -20,9 +22,36 @@ class APP(customtkinter.CTk):
         customtkinter.set_appearance_mode("dark")
         customtkinter.set_default_color_theme("blue")
 
-        self.geometry("1100x700")
+        style = ttk.Style()
+
+        style.theme_use("default")
+
+        style.configure("Treeview",
+                        background="#2E2E2E",
+                        foreground="white",
+                        rowheight=25,
+                        fieldbackground="#2E2E2E",
+                        bordercolor="#404040",
+                        font=("Helvetica", 12))
+
+        # Configure the headings (columns)
+        style.configure("Treeview.Heading",
+                        background="#1F1F1F",
+                        foreground="white",
+                        bordercolor="#404040",
+                        relief="flat",
+                        font=("Helvetica", 14, "bold"))
+
+        style.map("Treeview", background=[("selected", "#565656")])
+
+        style.configure("Treeview", borderwidth=0, relief="flat")
+        style.configure("Treeview.Heading", borderwidth=0, relief="flat")
+
+        self.geometry("1300x700")
         self.attributes('-topmost', 1)
-        self.title("OPC UA Server")
+        self.attributes('-topmost', 0)
+
+
 
         self.widget_height = 40
         self.widget_width = 190
@@ -30,12 +59,13 @@ class APP(customtkinter.CTk):
         self.font=customtkinter.CTkFont(size=18)
 
         self.status = "Stopped"
+        self.toplevel_window = None
 
         self.update_idletasks()
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
-        x_coordinate = (screen_width / 2) - (self.winfo_width() / 2)
-        y_coordinate = (screen_height / 2) - (self.winfo_height() / 2)
+        x_coordinate = (screen_width / 2) - (self.winfo_width() / 2 + 500)
+        y_coordinate = (screen_height / 2) - (self.winfo_height() / 2 + 200)
         self.geometry(f"+{int(x_coordinate)}+{int(y_coordinate)}")
         self.resizable(False, False)
 
@@ -67,7 +97,7 @@ class APP(customtkinter.CTk):
         self.frame.grid_rowconfigure(10, weight=2)
 
         self.button_setting = customtkinter.CTkButton(master=self.frame,
-                                                 command=self.temp,
+                                                 command=self.open_settings,
                                                  text="Settings",
                                                  width=self.widget_width,
                                                  height=self.widget_height,
@@ -129,38 +159,12 @@ class APP(customtkinter.CTk):
         #self.frame_event_display = CTkXYFrame(self.frame, width=600, height=400)
         #self.frame_event_display.grid(row=3, column=3, padx=10, pady=10, sticky="ew", columnspan=10, rowspan=10)
 
-
-        style = ttk.Style()
-
-        style.theme_use("default")
-
-        style.configure("Treeview",
-                        background="#2E2E2E",
-                        foreground="white",
-                        rowheight=25,
-                        fieldbackground="#2E2E2E",
-                        bordercolor="#404040",
-                        font=("Helvetica", 12))
-
-        # Configure the headings (columns)
-        style.configure("Treeview.Heading",
-                        background="#1F1F1F",
-                        foreground="white",
-                        bordercolor="#404040",
-                        relief="flat",
-                        font=("Helvetica", 14, "bold"))
-
-
-        style.map("Treeview", background=[("selected", "#565656")])
-
-        style.configure("Treeview", borderwidth=0, relief="flat")
-        style.configure("Treeview.Heading", borderwidth=0, relief="flat")
-
         self.table_event_display = ttk.Treeview(master=self.frame,
                                         columns=("Event Name", "Event Message", "Severity", "Recurring"),
                                         show="headings",
                                         height=20,
-                                        style="Treeview")
+                                        style="Treeview",
+                                        selectmode="extended")
 
         self.table_event_display.heading("Event Name", text="Event Name")
         self.table_event_display.heading("Event Message", text="Event Message")
@@ -169,8 +173,8 @@ class APP(customtkinter.CTk):
 
         self.table_event_display.column("Event Name", width=100)
         self.table_event_display.column("Event Message", width=200)
-        self.table_event_display.column("Severity", width=50)
-        self.table_event_display.column("Recurring", width=50)
+        self.table_event_display.column("Severity", width=20)
+        self.table_event_display.column("Recurring", width=20)
 
         self.table_event_display.grid(row=3, column=3, padx=10, pady=10, sticky="ew", columnspan=8, rowspan=10)
 
@@ -186,10 +190,24 @@ class APP(customtkinter.CTk):
 
         self.table_event_display.insert("", "end", values=new_event)
 
+        self.entry_event_name.delete(0, "end")
+        self.entry_event_message.delete(0, "end")
+        self.entry_event_severity.delete(0, "end")
+        self.entry_event_reacurring.delete(0, "end")
 
 
     def temp(self):
         pass
+
+
+    def open_settings(self):
+        """Opens the how-to-use page."""
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = SettingsWindow(self)
+        else:
+            self.toplevel_window.focus()
+        self.toplevel_window.lift()
+
 
 def main():
     """Main function to start the UI."""
