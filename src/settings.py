@@ -5,7 +5,7 @@ class SettingsWindow(customtkinter.CTkToplevel):
     """Class for the how-to-use window with the video tutorial."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.geometry("400x400")  # Adjusted height for a more compact look
+        self.geometry("500x400")  # Adjusted height for a more compact look
         self.resizable(False, False)
         self.title("Settings")
         self.attributes('-topmost', 1)

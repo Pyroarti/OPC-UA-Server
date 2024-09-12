@@ -2,16 +2,13 @@ import multiprocessing
 
 import customtkinter
 from CTkTable import *
-from PIL import Image
 from tkinter import ttk
 
 from settings import SettingsWindow
 
-
 from create_logger import setup_logger
 
 BACKGROUND_IMAGE = "UI/background.jpg"
-
 
 
 class APP(customtkinter.CTk):
@@ -50,8 +47,7 @@ class APP(customtkinter.CTk):
         self.geometry("1300x700")
         self.attributes('-topmost', 1)
         self.attributes('-topmost', 0)
-
-
+        self.title("OPC UA Server")
 
         self.widget_height = 40
         self.widget_width = 190
