@@ -1,0 +1,4 @@
+{
+    "server_endpoint": "opc.tcp://0.0.0.0:4840/OPCUA",
+    "server_name": "test"
+}
