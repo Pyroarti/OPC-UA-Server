@@ -3,6 +3,9 @@ from asyncua import ua
 from asyncua.server import Server as OPCUAServer, EventGenerator
 import pathlib
 import json
+import threading
+
+from create_logger import setup_logger
 
 
 class Server:
@@ -11,6 +14,13 @@ class Server:
         self.server_name = None
         self.server = None
         self.server_node = None
+        self.myvar = None
+        self.mybool = None
+        self.myint = None
+        self.idx = None
+
+        logger = setup_logger(__name__)
+
 
     def read_settings(self):
         parent = pathlib.Path(__file__).parent.parent
@@ -23,6 +33,7 @@ class Server:
 
             print(f"Settings read: {settings}")
 
+
     async def init_server(self):
         self.server = OPCUAServer()
 
@@ -32,6 +43,26 @@ class Server:
         self.server_node = self.server.nodes.server
 
         print(f"Server started at {self.server_endpoint}")
+
+        uri = "http://example.URI.io"
+        self.idx = await self.server.register_namespace(uri)
+
+        # Create an object in the address space
+        myobj = await self.server.nodes.objects.add_object(self.idx, "MyObject")
+
+        # Add a writable float variable
+        self.myvar = await myobj.add_variable(self.idx, "MyVariable", 6.7)
+        await self.myvar.set_writable()  # Allow clients to write to this variable
+
+        # Add a boolean variable that switches its value
+        self.mybool = await myobj.add_variable(self.idx, "MyBoolean", True)
+        await self.mybool.set_writable()  # Allow clients to write to this variable
+
+        # Add an integer variable that increments
+        self.myint = await myobj.add_variable(self.idx, "MyInteger", 0)
+        await self.myint.set_writable()  # Allow clients to write to this variable
+
+        print(f"MyObject, MyVariable, MyBoolean, and MyInteger added to the address space.")
 
     async def create_event(self, event_name, event_message, event_severity, event_reacurring):
         event_type = await self.server_node.add_object_type(0, event_name)
@@ -44,11 +75,30 @@ class Server:
 
         print(f"Event created: {event_name}, Message: {event_message}, Severity: {event_severity}")
 
+    async def run_server(self):
+        # Initialize the server and setup address space
+        await self.init_server()
 
+        bool_state = True  # Initial state of the boolean
+        int_counter = 0  # Initial value for the integer
 
+        async with self.server:
+            while True:
+                await asyncio.sleep(1)
 
+                # Increment the value of MyVariable (float)
+                current_value = await self.myvar.get_value()
+                new_value = current_value + 0.1
+                await self.myvar.write_value(new_value)
 
+                # Toggle the boolean value
+                bool_state = not bool_state
+                await self.mybool.write_value(bool_state)
 
+                # Increment the integer value
+                int_counter += 1
+                await self.myint.write_value(int_counter)
 
+                print(f"Updated MyVariable: {new_value}, MyBoolean: {bool_state}, MyInteger: {int_counter}")
 
 

@@ -1,5 +1,7 @@
 import multiprocessing
 import asyncio
+import json
+import threading
 
 import customtkinter
 from CTkTable import *
@@ -70,6 +72,7 @@ class APP(customtkinter.CTk):
         self.frame = customtkinter.CTkFrame(master=self, bg_color="transparent")
         self.frame.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.95, relheight=0.95)
 
+        # This code was made by pack gang, how does grid even work?
         self.frame.columnconfigure(0, weight=1)
         self.frame.columnconfigure(1, weight=1)
         self.frame.columnconfigure(2, weight=1)
@@ -179,8 +182,16 @@ class APP(customtkinter.CTk):
 
     def start_server(self):
         self.server = Server()
-        self.server.read_settings()
-        asyncio.run(self.server.init_server())
+        try:
+            self.server.read_settings()
+        except Exception as e:
+            return CTkMessagebox(title="Error", message=f"Failed to read settings {e}", icon="error")
+
+        threading.Thread(target=self.run_asyncio_server, daemon=True).start()
+
+
+    def run_asyncio_server(self):
+        asyncio.run(self.server.run_server())
 
 
     def add_event(self):

@@ -86,6 +86,18 @@ class SettingsWindow(customtkinter.CTkToplevel):
         )
         self.save_button.grid(row=6, column=0, padx=5, pady=(10, 0), sticky="we")
 
+        self.load_settings()
+
+
+    def load_settings(self):
+        with open ("server.json", "r") as file:
+            data = json.load(file)
+            if data:
+                self.endpoint_entry.insert(0, data["server_endpoint"])
+                self.server_name_entry.insert(0, data["server_name"])
+            else:
+                return
+
     def save_setting(self):
         # Get the values from the entries
         endpoint = self.endpoint_entry.get()
